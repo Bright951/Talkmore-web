@@ -15,8 +15,11 @@ router.post('/token', async(req, res)=>{
         )
     }
     const token = Client.createToken(id);
-    console.log(req.body);
    return res.json({ token });
+})
+
+router.post('/createChannel', async(req, res)=>{
+    const {name} = req.body;
 })
 
 module.exports= router;

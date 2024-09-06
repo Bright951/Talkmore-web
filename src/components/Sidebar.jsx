@@ -5,9 +5,9 @@ import { MdChat, MdFeed, MdHome, MdPerson } from 'react-icons/md'
 
 const Sidebar = () => {
   return (
-    <div className='w-1/5 h-full bg-white border-r-2 border-[turquoise] backdrop-blur-lg bg-gradient-to-t fixed top-0 bottom-0 left-0 from-[turquoise] to-[white]'>
+    <div className='w-1/5 h-full bg-transparent border-r-[0.5px] border-white backdrop-blur-lg fixed top-0 bottom-0 left-0 '>
             <div className="flex flex-col w-full h-max">
-                            <NavLink className='w-full border-[turquoise] border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold' to='/'>
+                            <NavLink className='w-full border-white border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold text-white' to='/'>
                                 <div className='w-[32px] h-[32px]'>
                                     <MdHome className='w-full h-full'/>
                                 </div> 
@@ -15,7 +15,7 @@ const Sidebar = () => {
                                     <p>Home</p>
                                 </div>
                             </NavLink>
-                            <NavLink className='w-full border-[turquoise] border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold' to='/Chat'>
+                            <NavLink className='w-full border-white border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold text-white' to='/Chat'>
                                 <div className='w-[32px] h-[32px]'>
                                     <MdChat className='w-full h-full'/>
                                 </div> 
@@ -23,7 +23,7 @@ const Sidebar = () => {
                                     <p>Chats</p>
                                 </div>
                             </NavLink>
-                            <NavLink className='w-full border-[turquoise] border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold' to='/Feed'>
+                            <NavLink className='w-full border-white border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold text-white' to='/Feed'>
                                 <div className='w-[32px] h-[32px]'>
                                     <MdFeed className='w-full h-full'/>
                                 </div> 
@@ -31,7 +31,7 @@ const Sidebar = () => {
                                     <p>Feed</p>
                                 </div>
                             </NavLink>
-                            <NavLink className='w-full border-[turquoise] border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold' to='/Profile'>
+                            <NavLink className='w-full border-white border-b-[0.5px] p-[1rem] flex flex-row gap-4 justify-start items-center font-bold text-white' to='/Profile'>
                                 <div className='w-[32px] h-[32px]'>
                                     <MdPerson className='w-full h-full'/>
                                 </div> 
