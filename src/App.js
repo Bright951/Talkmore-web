@@ -1,20 +1,31 @@
-import React from 'react'
-import Home from './pages/Home'
-import Sidebar from './components/Sidebar'
-import ChatScreen from './pages/Chat';
+import { Route, Routes, BrowserRouter as Router, useSearchParams , } from 'react-router-dom';
+import Home from './pages/Home.jsx';
+import Chat from './pages/Chat.jsx';
+import Profile from './pages/Profile.jsx';
+import Login from './Auth/Login.jsx';
+import SignUp from './Auth/SignUp.jsx';
+import Sidebar from './components/Sidebar';
+import ChatComponent from './components/CreateChannel.jsx';
+import Users from './pages/Users.jsx';
+// import Layout from './Layout.js';
 
-const App = () => {
-  
-  return (
-      <div className='flex w-full h-screen bg-gradient-to-tr from-[purple] to-white'>
-        <div className='fixed h-full w-[20%] left-0 top-0 bottom-0 z-50'>
-          <Sidebar/>
-        </div>
-        <div className='flex-1 ml-[20%] p-4'>
-          <Home/>
-        </div>
-
-      </div>
+function App(){
+  // const {cid} = useSearchParams()
+  return(
+    <Router>
+      <Sidebar/> 
+      <main className='ml-[80px]'>
+        <Routes>
+          <Route path='/' element={<Home/>} />
+          <Route path='/Friends' element={<Users/>} />
+          <Route path='/Chat' element={<Chat/>} /> 
+          <Route path='/Profile' element={<Profile/>} /> 
+          <Route path='/Login' element={<Login/>} />
+          <Route path='/Signup' element={<SignUp/>} />
+          {/* <Route path='/Channel element={<ChatComponent/>}/> */}
+        </Routes>
+      </main>
+    </Router>
   )
 }
 

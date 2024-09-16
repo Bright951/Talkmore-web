@@ -1,8 +1,85 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { LuLogOut } from "react-icons/lu";
+import { useNavigate } from 'react-router-dom';
+import './index.scss'
+import { Avatar } from 'stream-chat-react';
 
 const Profile = () => {
+    const navigate = useNavigate()
+    const [displayModal, setDisplayModal]=useState(false)
+
+    const LogoutModal = () => {
+      const LogOut=()=>{
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        navigate('/Login')
+      }
+      return (
+        <div className='fixed w-full h-[full] top-0 bottom-0 left-0 right-0 bg-black flex bg-opacity-75 justify-center items-center'>
+            <div className="flex w-2/5 h-[35%] rounded-lg flex-col bg-white items-center gap-4">
+                <h1 className='pt-4 font-sans text-2xl font-bold'>LOGOUT</h1>
+                <p className='text-xl'>Are you sure you want to Logout ?</p>
+                <div className="flex flex-row items-center justify-center w-full gap-4 p-6">
+                    <button 
+                        className='bg-black p-4 w-[40%] text-white rounded-md font-bold hover:bg-transparent hover:border-[1px] hover:border-black hover:text-black'
+                        onClick={LogOut}
+                    >
+                        Yes
+                    </button>
+                    <button 
+                        className='bg-black p-4 w-[40%] text-white rounded-md hover:bg-transparent font-bold hover:border-[1px] hover:border-black hover:text-black'
+                        onClick={()=> setDisplayModal(false)}
+                    >
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+      )
+    }
+    
+    useEffect(() => {
+      const user = localStorage.getItem('user');
+      if (!user) {
+          navigate('/login');
+      }
+  }, [navigate]); 
+
+    const User = localStorage.getItem('user')
+    const user = JSON.parse(User)
+    console.log(user)
+    const name = user.name
+    const tag = user.tag
+  
   return (
-    <div>Profile</div>
+    <div className='w-full h-screen bg-white rounded-md'>
+      <div className="relative flex flex-col items-center justify-center w-full h-max">
+        <div className="flex w-10 h-10 absolute top-6 right-6 cursor-pointer logout-container hover:bg-[rgba(209,213,219,0.5)] p-[5px] rounded-full">
+          <LuLogOut className='w-full h-full' onClick={()=> setDisplayModal(true)}/>
+          <span className='bg-black text-white absolute p-2 right-2 top-10 text-[10px] font-bold rounded-md tool-tip hidden'>
+            Logout
+          </span>
+        </div>
+
+        <div className="rounded-full w-40 h-40 border-black border-[1px] mt-8">
+        <Avatar
+          // image={user.image}           // User's profile image
+          name={user.name}             // User's name
+          size={50}                    // Avatar size (optional, defaults to 32)
+          shape="circle"               // Shape of avatar, can be "circle" or "square"
+        />
+        </div>
+        <div className="flex flex-col items-center justify-center p-4 font-bold text-black">
+          <span className='text-3xl'>{name}</span>
+          <span>{tag}</span>
+        </div>
+      </div>
+      {
+        displayModal && (
+          <LogoutModal/>
+        )
+      }
+    </div>
   )
 }
 

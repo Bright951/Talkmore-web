@@ -19,12 +19,22 @@ const app = express()
 app.use(express.json());
 app.use(cors(corsOptions));
 app.use('/stream', StreamRoutes)
-app.use('/user', userRoutes)
+app.use('/user',userRoutes)
 app.listen(port, ()=>{
     console.log('server successfully started')
 })
 
-const StreamClient = StreamChat.getInstance('8v8qsaucf6em','7seufzx93t5rk5wnjeucey6pgj5vnsgrbkmghzy4z3q5f5hunq52qmxubbh25cuc');
+const StreamClient = StreamChat.getInstance('9p8295bc7zpv','8926gf82n3vp99egt2rtwshstyy5mvfk47urt3z7yq6buprb6bff7fhfxk8qtyk4');
+
+const PostFile = async(file)=>{
+    await axios.post(file, 'http://localhost:5000/user/reg')
+    console.log('posted');
+}
+
+// app.post('/profile', upload.single('avatar'), function (req, res, next){
+//     const file = (req.file)
+//     PostFile(file)
+// })
 
 const UserCredentials={
     id: 'john',
@@ -32,29 +42,12 @@ const UserCredentials={
     image: 'https://getstream.io/random_svg/?name=John',
 }
 
-const CreateUser= async()=>{
-
-   const TokenResponse =  await axios.post('http://localhost:5000/stream/token', {
-        id: UserCredentials.id
-    })
-    const userToken = TokenResponse.data.token
-    await StreamClient.connectUser(
-        {
-            id: UserCredentials.id,
-            name: UserCredentials.name,
-            image: UserCredentials.image,
-        },
-        userToken
-    )
-    
-}
-CreateUser();
-
 const CreateChannel= async ()=>{
     try {
         const channel = StreamClient.channel('messaging', 'travel', {
-            name: 'First Chat',
-            created_by: { id: 'john' },
+            name: 'Our Chat',
+            created_by: { id: 'Bethel' },
+            members: ['Bethel', '66dca39456e77161fa89'],
         });
         await channel.watch();
     } catch (error) {
@@ -62,3 +55,8 @@ const CreateChannel= async ()=>{
     }
 }
 // CreateChannel()
+
+// const channel = client.channel('messaging', {
+//     members: ['thierry', 'tommaso'],
+// });
+// await channel.create();
