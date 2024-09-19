@@ -5,7 +5,6 @@ const Home = () => {
   const navigate = useNavigate()
   const checkUser =()=>{
     const User = localStorage.getItem('user')
-    console.log(User);
 
     if(!User){
       navigate('/Login')

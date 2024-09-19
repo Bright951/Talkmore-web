@@ -42,18 +42,18 @@ const UserCredentials={
     image: 'https://getstream.io/random_svg/?name=John',
 }
 
-const CreateChannel= async ()=>{
-    try {
-        const channel = StreamClient.channel('messaging', 'travel', {
-            name: 'Our Chat',
-            created_by: { id: 'Bethel' },
-            members: ['Bethel', '66dca39456e77161fa89'],
-        });
-        await channel.watch();
-    } catch (error) {
-        console.log(error.message);
-    }
-}
+// const CreateChannel= async ()=>{
+//     try {
+//         const channel = StreamClient.channel('messaging', 'travel', {
+//             name: 'Our Chat',
+//             created_by: { id: '7d9d06b2-f93d-4982-9413-09c46dfd55db' },
+//             members: ['7d9d06b2-f93d-4982-9413-09c46dfd55db', 'cce17d22-0ba5-47cd-af76-41456e4de78b'],
+//         });
+//         await channel.watch();
+//     } catch (error) {
+//         console.log(error.message);
+//     }
+// }
 // CreateChannel()
 
 // const channel = client.channel('messaging', {

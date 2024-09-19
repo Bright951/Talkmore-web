@@ -142,6 +142,15 @@ const SignUp = () => {
                     </Link>
                 </p>
             </form>
+            {
+                loading && (
+                    <div className="flex items-center justify-center w-full h-full">
+                        <svg className="w-5 h-5 mr-3 text-white bg-black animate-spin" viewBox="0 0 24 24">
+                        </svg>
+                        <p>Loading</p>
+                    </div>
+                )
+            }
         </div>
     );
 };

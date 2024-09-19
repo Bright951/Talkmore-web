@@ -2,12 +2,10 @@ const express = require('express')
 const dotenv = require('dotenv')
 const router = express.Router()
 dotenv.config()
-const {CreateUserToken} = require('../controllers/streamControllers')
+const {CreateUserToken, CreateChannel} = require('../controllers/streamControllers')
 
 router.post('/token', CreateUserToken)
 
-router.post('/createChannel', async(req, res)=>{
-    const {name} = req.body;
-})
+router.post('/createChannel', CreateChannel)
 
 module.exports= router;
