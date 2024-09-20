@@ -50,28 +50,41 @@ const Profile = () => {
     console.log(user)
     const name = user.name
     const tag = user.tag
+
+    const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
+    const selectedTheme = localStorage.getItem('userTheme')
+    // const [open, setOpen] = useState(false)
+  
+    useEffect(() => {
+        document.documentElement.classList.remove('light', 'dark'); // Remove previous theme classes
+        document.documentElement.classList.add(theme); // Add the current theme class
+        localStorage.setItem('userTheme', theme); // Store the theme in localStorage
+      }, [theme]); 
   
   return (
-    <div className='w-full h-screen bg-white rounded-md'>
+    <div className='w-full h-screen bg-white rounded-md dark:bg-black'>
       <div className="relative flex flex-col items-center justify-center w-full h-max">
-        <div className="flex w-10 h-10 absolute top-6 right-6 cursor-pointer logout-container hover:bg-[rgba(209,213,219,0.5)] p-[5px] rounded-full">
+        <div className="flex w-10 h-10 absolute top-6 right-6 cursor-pointer dark:text-white logout-container hover:bg-[rgba(209,213,219,0.5)] p-[5px] rounded-full">
           <LuLogOut className='w-full h-full' onClick={()=> setDisplayModal(true)}/>
-          <span className='bg-black text-white absolute p-2 right-2 top-10 text-[10px] font-bold rounded-md tool-tip hidden'>
+          <span className='bg-black text-white absolute p-2 right-2 top-10 text-[10px] dark:border-white border-[1px] font-bold rounded-md tool-tip hidden'>
             Logout
           </span>
         </div>
 
-        <div className="rounded-full w-40 h-40 border-black border-[1px] mt-8">
-        <Avatar
+        <div className="rounded-full w-40 h-40 border-black dark:border-white border-[1px] mt-8">
+        {/* <Avatar
           // image={user.image}           // User's profile image
           name={user.name}             // User's name
           size={50}                    // Avatar size (optional, defaults to 32)
           shape="circle"               // Shape of avatar, can be "circle" or "square"
-        />
+        /> */}
         </div>
-        <div className="flex flex-col items-center justify-center p-4 font-bold text-black">
+        <div className="flex flex-col items-center justify-center p-4 font-bold text-black dark:text-white">
           <span className='text-3xl'>{name}</span>
           <span>{tag}</span>
+        </div>
+        <div className="w-full bg-black h-max">
+          
         </div>
       </div>
       {

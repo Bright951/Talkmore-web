@@ -37,6 +37,14 @@ const Users = () => {
       const CreateChat=(user)=>{
 
       }
+
+      const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
+  
+      useEffect(() => {
+          document.documentElement.classList.remove('light', 'dark'); // Remove previous theme classes
+          document.documentElement.classList.add(theme); // Add the current theme class
+          localStorage.setItem('userTheme', theme); // Store the theme in localStorage
+        }, [theme]); 
       
       const openModal = (user) => {
         setSelectedUser(user);
@@ -57,13 +65,13 @@ const Users = () => {
       },[])
     
   return (
-    <div className='w-full h-screen bg-white rounded-md'>
+    <div className='w-full h-screen bg-white rounded-md dark:bg-black'>
         <div className="flex w-[26%] flex-col gap-6 h-screen border-[rgb(156,163,175,0.1)] border-2 items-center">
-            <h2 className="text-xl font-bold text-black p-[8px]">
+            <h2 className="text-xl font-bold text-black p-[8px] dark:text-white">
                 Connect With Other Users.
             </h2>
-            <div className='w-[18rem] h-[50px] flex flex-row p-2 bg-[rgb(156,163,175,0.1)] rounded-lg relative justify-center items-center'>
-                <FaSearch color='rgb(156,163,175)' className='absolute left-[10px]' />
+            <div className='w-[18rem] h-[50px] flex flex-row p-2 bg-[rgb(156,163,175,0.1)] dark:bg-white dark:text-black text-[rgb(156,163,175)] rounded-lg relative justify-center items-center'>
+                <FaSearch className='absolute left-[10px]' />
                 <input
                     type='search'
                     placeholder='search for users'
@@ -95,9 +103,9 @@ const Users = () => {
                 {
                   loading && (
                         <div className="flex items-center justify-center w-full h-full">
-                          <svg className="w-5 h-5 mr-3 text-white bg-black animate-spin" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 mr-3 bg-black dark:bg-white animate-spin" viewBox="0 0 24 24">
                           </svg>
-                          <p>Loading</p>
+                          <p  className="dark:text-white">Loading</p>
                         </div>
                     )
                 }

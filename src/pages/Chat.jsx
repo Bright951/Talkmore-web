@@ -8,6 +8,7 @@ import {
     MessageList,
     MessageInput,
     useCreateChatClient,
+    ChannelHeader
 } from 'stream-chat-react';
 import { IoMdAddCircleOutline } from "react-icons/io";
 import 'stream-chat-react/dist/css/v2/index.css';
@@ -23,6 +24,16 @@ const Chat = () => {
     const [users, setUsers] = useState([]);
     const [AlreadyLoggedInUserId, setAlreadyLoggedInUserId] = useState('');
     const navigate = useNavigate();
+
+    const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
+    const selectedTheme = localStorage.getItem('userTheme')
+    // const [open, setOpen] = useState(false)
+  
+    useEffect(() => {
+        document.documentElement.classList.remove('light', 'dark'); // Remove previous theme classes
+        document.documentElement.classList.add(theme); // Add the current theme class
+        localStorage.setItem('userTheme', theme); // Store the theme in localStorage
+      }, [theme]); 
 
     useEffect(() => {
         const checkUser = () => {
@@ -65,10 +76,10 @@ const Chat = () => {
         }
     }, [client]);
 
-    const setChat = ({ channel }) => {
+    const setChat = (channel) => {
         setChannel(channel);
-        console.log(channel);
     };
+    console.log(channel);
 
     if (!client || !token) {
         return (
@@ -97,12 +108,12 @@ const Chat = () => {
     const filters = {members: { $in: [id] }};
 
     return (
-        <div className='flex w-full bg-white rounded-md'>
+        <div className='flex w-full bg-white rounded-md relative'>
             {/* Left side: Channel List */}
             <div className='flex justify-center w-[26%] h-screen border-r-[3px]'>
                 <div className='flex flex-col h-full w-full justify-center border-[rgb(156,163,175,0.1)]'>
                     <div className="flex flex-row items-center justify-center w-full gap-2 pb-6 h-max">
-                        <div className='w-[18rem] h-[50px] flex flex-row p-2 bg-[rgb(156,163,175,0.1)] rounded-lg relative ml-6 justify-center items-center mt-6'>
+                        <div className='w-[18rem] h-[50px] flex flex-row p-2 bg-[rgb(156,163,175,0.1)] rounded-lg ml-6 justify-center items-center mt-6'>
                             <FaSearch color='rgb(156,163,175)' className='absolute left-[10px]' />
                             <input
                                 type='search'
@@ -122,29 +133,23 @@ const Chat = () => {
                         <Chats client={client}>
                             <ChannelList
                                 filters={filters}
-                                // filters={filters}
-                                // onSelect={({channel}) => setChat({channel})}
                             />
+                            <div className="flex w-[68vw] h-[98vh] absolute top-0 left-[26%] z-50">
+                                <div className="w-full h-full">
+                                    <Channel>
+                                        <Window>
+                                            <ChannelHeader/>
+                                            <MessageList />
+                                            <MessageInput />
+                                        </Window>
+                                    </Channel>
+                                </div>
+                            </div>
                         </Chats>
                     </div>
                 </div>
             </div>
 
-            {/* Right side: Message Section */}
-            <div className='flex w-full h-screen p-4'>
-                {channel ? (
-                    <Channel channel={channel}>
-                        <Window>
-                            <MessageList />
-                            <MessageInput />
-                        </Window>
-                    </Channel>
-                ) : (
-                    <div className='flex items-center justify-center h-full'>
-                        <h2 className='text-gray-500'>Select a channel to view messages</h2>
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
