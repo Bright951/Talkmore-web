@@ -16,6 +16,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';  // Correct import
 import { Client } from 'appwrite';
+import CustomChannelHeader from '../components/CustomChannelHeader';
 
 const Chat = () => {
     const apiKey = process.env.REACT_APP_STREAM_CHAT_API_KEY;
@@ -37,7 +38,7 @@ const Chat = () => {
 
     useEffect(() => {
         const checkUser = () => {
-            const User = localStorage.getItem('streamUser');
+            const User = localStorage.getItem('user');
             if (!User) {
                 navigate('/Login');
             }
@@ -45,21 +46,12 @@ const Chat = () => {
         checkUser();
     }, [navigate]);
 
-    const User = localStorage.getItem('streamUser');
+    const User = localStorage.getItem('user');
     const user = JSON.parse(User);
     const id = user.id;
 
     useEffect(() => {
-        const getToken = async () => {
-            try {
-                const res = await axios.post('http://localhost:5000/stream/token', { id });
-                const tok = res.data.token;
-                setToken(tok);
-            } catch (err) {
-                console.log('Error fetching token:', err);
-            }
-        };
-        getToken();
+        
     }, [id]);
 
     const client = useCreateChatClient({
@@ -67,7 +59,7 @@ const Chat = () => {
         tokenOrProvider: token,  // Use token directly
         userData: { id: id, email: user.email },
     });
-
+    
     useEffect(() => {
         if (client) {
             console.log('Client initialized successfully:', client);
@@ -75,11 +67,6 @@ const Chat = () => {
             console.log('Client not initialized');
         }
     }, [client]);
-
-    const setChat = (channel) => {
-        setChannel(channel);
-    };
-    console.log(channel);
 
     if (!client || !token) {
         return (
@@ -108,7 +95,7 @@ const Chat = () => {
     const filters = {members: { $in: [id] }};
 
     return (
-        <div className='flex w-full bg-white rounded-md relative'>
+        <div className='relative flex w-full bg-white rounded-md'>
             {/* Left side: Channel List */}
             <div className='flex justify-center w-[26%] h-screen border-r-[3px]'>
                 <div className='flex flex-col h-full w-full justify-center border-[rgb(156,163,175,0.1)]'>
@@ -134,13 +121,16 @@ const Chat = () => {
                             <ChannelList
                                 filters={filters}
                             />
-                            <div className="flex w-[68vw] h-[98vh] absolute top-0 left-[26%] z-50">
+                            <div className="flex w-[68vw] h-[98vh] absolute top-0 left-[26%] z-">
                                 <div className="w-full h-full">
                                     <Channel>
                                         <Window>
-                                            <ChannelHeader/>
-                                            <MessageList />
-                                            <MessageInput />
+                                            {/* <ChannelHeader/> */}
+                                            <CustomChannelHeader/>
+                                            <div className="flex flex-col h-full pt-14">
+                                                <MessageList />
+                                                <MessageInput />
+                                            </div>
                                         </Window>
                                     </Channel>
                                 </div>
@@ -149,7 +139,6 @@ const Chat = () => {
                     </div>
                 </div>
             </div>
-
         </div>
     );
 };

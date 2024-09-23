@@ -3,6 +3,7 @@ import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from 'react-router-dom';
 import './index.scss'
 import { Avatar } from 'stream-chat-react';
+import { IoMdNotificationsOutline } from "react-icons/io";
 
 const Profile = () => {
     const navigate = useNavigate()
@@ -12,6 +13,9 @@ const Profile = () => {
       const LogOut=()=>{
         localStorage.removeItem('token')
         localStorage.removeItem('user')
+        localStorage.removeItem('expiryTime')
+        localStorage.removeItem('streamUser')
+        localStorage.removeItem('userTheme')
         navigate('/Login')
       }
       return (
@@ -64,11 +68,23 @@ const Profile = () => {
   return (
     <div className='w-full h-screen bg-white rounded-md dark:bg-black'>
       <div className="relative flex flex-col items-center justify-center w-full h-max">
-        <div className="flex w-10 h-10 absolute top-6 right-6 cursor-pointer dark:text-white logout-container hover:bg-[rgba(209,213,219,0.5)] p-[5px] rounded-full">
-          <LuLogOut className='w-full h-full' onClick={()=> setDisplayModal(true)}/>
-          <span className='bg-black text-white absolute p-2 right-2 top-10 text-[10px] dark:border-white border-[1px] font-bold rounded-md tool-tip hidden'>
-            Logout
-          </span>
+        <div className="icon-container flex flex-row w-max h-max absolute gap-10 top-6 right-6 ">
+          <div className="flex w-10 h-10 cursor-pointer relative dark:text-white logout-container items-center justify-center hover:bg-[rgba(209,213,219,0.5)] p-[5px] rounded-full">
+            <IoMdNotificationsOutline className='w-full h-full '/>
+            <div className='w-2 items-center flex justify-center dark:bg-black dark:border-white dark:border-[1px] dark:text-white top-0 left-[1.4rem] h-2 p-2 absolute rounded-full bg-red-600 text-white'>
+              <p>1</p>
+            </div>
+            <span className='bg-black text-white absolute p-2 top-10 text-[10px] dark:border-white border-[1px] font-bold rounded-md tool-tip hidden'>
+              Notifications
+            </span>
+          </div>
+        
+          <div className="flex w-10 h-10 cursor-pointer dark:text-white logout-container items-center justify-center hover:bg-[rgba(209,213,219,0.5)] p-[5px] rounded-full">
+            <LuLogOut className='w-full h-full' onClick={()=> setDisplayModal(true)}/>
+            <span className='bg-black text-white absolute p-2 top-10 text-[10px] dark:border-white border-[1px] font-bold rounded-md tool-tip hidden'>
+              Logout
+            </span>
+          </div>
         </div>
 
         <div className="rounded-full w-40 h-40 border-black dark:border-white border-[1px] mt-8">

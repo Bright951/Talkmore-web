@@ -8,6 +8,7 @@ import Sidebar from './components/Sidebar';
 import ChatComponent from './components/CreateChannel.jsx';
 import Users from './pages/Users.jsx';
 import Settins from './pages/Settins.jsx';
+import VideoCall from './pages/VideoCall.jsx';
 // import Layout from './Layout.js';
 
 function App(){
@@ -24,6 +25,7 @@ function App(){
           <Route path='/Settings' element={<Settins/>} /> 
           <Route path='/Login' element={<Login/>} />
           <Route path='/Signup' element={<SignUp/>} />
+          <Route path='/Video' element={<VideoCall/>} />
           {/* <Route path='/Channel element={<ChatComponent/>}/> */}
         </Routes>
       </main>

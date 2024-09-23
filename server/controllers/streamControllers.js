@@ -1,5 +1,5 @@
 const { StreamChat } = require('stream-chat');
-const Client = StreamChat.getInstance('q9c62gfapz9y','32bbtzd9ryha5qgpghyhp47f85jfybfsb3byts7r8xw4daawbhrn2wt55bep5593');
+const Client = StreamChat.getInstance('7xbczcyhwmhd','3m8pq4v7b66wefunef3kgbqyt3cdspvpnnms9j9qfbt7vkxanmddhrumq96wp2rv');
 const { v4: uuidv4 } = require('uuid');
 // console.log(Client);
 

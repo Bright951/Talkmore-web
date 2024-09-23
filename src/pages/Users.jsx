@@ -13,6 +13,7 @@ const Users = () => {
     const navigate = useNavigate()
     const [displayModal, setDisplayModal] = useState(false)
     const [selectedUser, setSelectedUser] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
     
     useEffect(()=>{
         const getUsers=()=>{
@@ -21,7 +22,9 @@ const Users = () => {
           const LoggedInuserObject = JSON.parse(LoggedInUserData)
           const LoggedInuserId = LoggedInuserObject.id
           
-          axios.post('http://localhost:5000/user/getUsers',{LoggedInuserId})
+          axios.post('http://localhost:5000/user/getUsers',{LoggedInuserId}, {
+            timeout: 10000,
+          })
           .then((res)=>{
             // setAlreadyLoggedInUserId(LoggedInuserId)
             setUsers(res.data.Users)
@@ -34,9 +37,9 @@ const Users = () => {
         getUsers()
       },[])
 
-      const CreateChat=(user)=>{
+      // const CreateChat=(user)=>{
 
-      }
+      // }
 
       const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
   
@@ -63,6 +66,18 @@ const Users = () => {
       useEffect(()=>{
         checkUser()
       },[])
+
+      const searchUser=async(e)=>{
+        e.preventDefault()
+        setSearchTerm(e.target.value)
+        await axios.post('http://localhost:5000/user/searchUsers', searchTerm)
+        .then((res)=>{
+          console.log(res)
+        })
+        .catch((err)=>{
+          console.log(err)
+        })
+      }
     
   return (
     <div className='w-full h-screen bg-white rounded-md dark:bg-black'>
@@ -78,6 +93,8 @@ const Users = () => {
                     id='search'
                     name='search'
                     className='p-[5px] w-full bg-transparent focus:outline-none pl-6 text-[rgb(156,163,175)]'
+                    value={searchTerm}
+                    onChange={searchUser}
                 />
             </div>
 
@@ -85,7 +102,7 @@ const Users = () => {
                 {
                     users && (
                         users.map((user, i)=>(
-                            <div className='flex w-full h-max items-start p-2 border-[1px] border-black flex-row relative' key={i}>
+                            <div className='flex w-full h-max items-start p-2 mb-4 shadow-md flex-col relative' key={i}>
                                 <h3 className='text-xl font-bold text-black'>{user.name}</h3>
                                 <p className='text-[rgb(156,163,175)] text-[15px]'>{user.tag}</p>
                                 <div className='absolute flex w-6 h-6 right-12'>

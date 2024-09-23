@@ -34,12 +34,11 @@ const Login = () => {
     })
     .then((res)=>{
       setLoading(false)
+      console.log(res)
       const {token, user} = res.data
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      // saveToken()
-      console.log(token , user);    
-      Reset()
+      console.log(token , user)
       navigate('/')
     })
     .catch((err) =>{
