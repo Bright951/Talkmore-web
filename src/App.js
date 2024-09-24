@@ -9,27 +9,29 @@ import ChatComponent from './components/CreateChannel.jsx';
 import Users from './pages/Users.jsx';
 import Settins from './pages/Settins.jsx';
 import VideoCall from './pages/VideoCall.jsx';
-// import Layout from './Layout.js';
+import { VideoClientProvider } from './contexts/VideoCallContext.js';
 
 function App(){
 
   return(
-    <Router>
-      <Sidebar/> 
-      <main className='ml-[80px] dark:bg-black '>
-        <Routes>
-          <Route path='/' element={<Home/>} />
-          <Route path='/Friends' element={<Users/>} />
-          <Route path='/Chat' element={<Chat/>} /> 
-          <Route path='/Profile' element={<Profile/>} /> 
-          <Route path='/Settings' element={<Settins/>} /> 
-          <Route path='/Login' element={<Login/>} />
-          <Route path='/Signup' element={<SignUp/>} />
-          <Route path='/Video' element={<VideoCall/>} />
-          {/* <Route path='/Channel element={<ChatComponent/>}/> */}
-        </Routes>
-      </main>
-    </Router>
+    <VideoClientProvider>
+      <Router>
+        <Sidebar/> 
+        <main className='ml-[80px] dark:bg-black '>
+          <Routes>
+            <Route path='/' element={<Home/>} />
+            <Route path='/Friends' element={<Users/>} />
+            <Route path='/Chat' element={<Chat/>} /> 
+            <Route path='/Profile' element={<Profile/>} /> 
+            <Route path='/Settings' element={<Settins/>} /> 
+            <Route path='/Login' element={<Login/>} />
+            <Route path='/Signup' element={<SignUp/>} />
+            <Route path='/Video/Create&joinCall' element={<VideoCall/>} />
+            {/* <Route path='/Channel element={<ChatComponent/>}/> */}
+          </Routes>
+        </main>
+      </Router>
+    </VideoClientProvider> 
   )
 }
 

@@ -53,9 +53,8 @@ const SignUpUser = async(req, res)=>{
                 // image: Pic,
             }
         )
-            const Appwrite_token = jwt.sign({ userId: Appwrite_User_Details.$id }, secret, { expiresIn: '1d' });
+            const Appwrite_token = jwt.sign({ user_id: Appwrite_User_Details.id }, secret, { expiresIn: '1d' });
         
-
         await StreamClient.upsertUser({
             id: uid,
             name: name,
@@ -103,19 +102,19 @@ const SignInUser = async(req, res)=>{
             Query.equal('email', [userEmail]),
             Query.equal('name', [name])
         ]);
-        console.log(IsValid)
+
         if (IsValid.total === 0) {
             return res.status(400).json({ message: 'Invalid email or name' });
         }
         const userResponse = IsValid.documents[0]
         const document = JSON.stringify(userResponse)
         const user = JSON.parse(document)
-        console.log(user)
+        
         const passwordMatch = await bcrypt.compare(passKey, user.passkey);
         if (!passwordMatch) {
             return res.status(400).json({ message: 'Invalid or password' });
         }
-        const token = jwt.sign({ userId: user.$id }, secret, { expiresIn: '1d' });
+        const token = jwt.sign({ user_id: user.id }, secret, { expiresIn: '1d' });
 
         const TokenResponse =  await axios.post('http://localhost:5000/stream/token', {
             id: user.id
@@ -162,7 +161,7 @@ const searchUser=async(req, res)=>{
     const {searchTerm}=req.body
     console.log(req.body)
     try{
-        const response = await StreamClient.queryUsers({name:{$autocomplete: searchTerm}}, {tag:{$autocomplete: searchTerm}})
+        const response = await StreamClient.queryUsers({name:{$autocomplete: searchTerm}})
         console.log(response)
         res.status(200).json({Users : response})
     }catch(err){
@@ -171,9 +170,93 @@ const searchUser=async(req, res)=>{
     }
 }
 
+const LikeProfile = async(req, res)=>{
+    const {likedUserId, likerId}=req.body
+    console.log(req.body)
+    try{
+        const response = await databases.listDocuments('TMWDB001', 'TMWC002',[
+            // Query.equal('likerId', [likerId]),
+            Query.equal('LikedUserId', [likedUserId])
+        ])
+        if (response.documents.length === 0) {
+            await databases.create(
+                'TMWDB001',
+                'TMWC002',
+                ID.unique(),
+                {
+                    likerId,
+                    likedUserId,
+                }
+            )
+            return res.status(201).json({ message: 'Profile liked' });
+        }else{
+            return res.status(400).json({ error: 'Profile already liked' });
+        }
+    }catch(error){
+        console.error('Error liking profile:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const UnlikeProfile = async(req, res)=>{
+    const { likedUserId, likerId } = req.body;
+    console.log(req.body)
+    try{
+        const response = await databases.listDocuments(
+            'TMWDB001',
+            'TMWC002',
+            [
+            //   Query.equal('likerId', [likerId]),
+            Query.equal('LikedUserId', [likedUserId]),
+            ]
+          );
+          if (response.documents.length > 0) {
+            await databases.deleteDocument(
+              'TMWDB001',
+              'TWC002',
+              response.documents[0].$id
+            );
+            return res.status(200).json({ message: 'Profile unliked' });
+          } else {
+            return res.status(400).json({ error: 'Profile not liked' });
+          }
+    }catch(error){
+        console.error('Error unliking profile:', error);
+      return res.status(500).json({ error: 'Internal server error' })
+    }
+}
+
+const CheckIfLiked = async(req, res)=>{
+    const { likedUserId, likerId } = req.query;
+    console.log(req.body)
+
+    try{
+        const response = await databases.listDocuments(
+            'TMWDB001',
+            'TMWC002',
+            [
+                // Query.equal('likerId', likerId),
+                Query.equal('LikedUserId', [likedUserId])
+            ]
+        );
+
+        if (response.documents.length > 0) {
+            return res.status(200).json({ liked: true });
+        } else {
+            return res.status(200).json({ liked: false });
+        }
+    }catch(error){
+        console.error('Error checking like status:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}  
+  
 module.exports={
     SignUpUser,
     SignInUser,
     getAllUsers,
-    searchUser
+    searchUser,
+    LikeProfile,
+    UnlikeProfile,
+    CheckIfLiked
 }

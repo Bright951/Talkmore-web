@@ -8,6 +8,7 @@ import CreateChannelModal from '../components/CreateChannel';
 
 const Users = () => {
     const [AlreadyLoggedInUserId, setAlreadyLoggedInUserId] = useState('')
+    const [searchResults, setSearchResults] = useState(null)
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
@@ -70,9 +71,9 @@ const Users = () => {
       const searchUser=async(e)=>{
         e.preventDefault()
         setSearchTerm(e.target.value)
-        await axios.post('http://localhost:5000/user/searchUsers', searchTerm)
+        await axios.post('http://localhost:5000/user/searchUsers', {searchTerm})
         .then((res)=>{
-          console.log(res)
+          setSearchResults(res.data.Users.users)
         })
         .catch((err)=>{
           console.log(err)
@@ -99,10 +100,10 @@ const Users = () => {
             </div>
 
             <div className="flex flex-col w-full h-full overflow-y-scroll">
-                {
+                {/* {
                     users && (
                         users.map((user, i)=>(
-                            <div className='flex w-full h-max items-start p-2 mb-4 shadow-md flex-col relative' key={i}>
+                            <div className='relative flex flex-col items-start w-full p-2 mb-4 shadow-md h-max' key={i}>
                                 <h3 className='text-xl font-bold text-black'>{user.name}</h3>
                                 <p className='text-[rgb(156,163,175)] text-[15px]'>{user.tag}</p>
                                 <div className='absolute flex w-6 h-6 right-12'>
@@ -116,8 +117,8 @@ const Users = () => {
                                 </div>
                             </div>
                     )))
-                }
-                {
+                } */}
+                { 
                   loading && (
                         <div className="flex items-center justify-center w-full h-full">
                           <svg className="w-5 h-5 mr-3 bg-black dark:bg-white animate-spin" viewBox="0 0 24 24">
@@ -125,6 +126,41 @@ const Users = () => {
                           <p  className="dark:text-white">Loading</p>
                         </div>
                     )
+                }
+                {!loading && !users.length && !searchResults && <p>No users found.</p>}
+                {/* {users && !searchResults && users.map((user, i)=>[
+                  <div className='relative flex flex-col items-start w-full p-2 mb-4 shadow-md h-max' key={i}>
+                    <h3 className='text-xl font-bold text-black'>{user.name}</h3>
+                    <p className='text-[rgb(156,163,175)] text-[15px]'>{user.tag}</p>
+                  <div className='absolute flex w-6 h-6 right-12'>
+                    <HiUserPlus className='w-full h-full'/>
+                  </div>
+                  <div 
+                    className="absolute flex w-6 h-6 cursor-pointer right-2 group"
+                    onClick={(user)=>openModal(user)}
+                  >
+                    <img src={AddChat} alt="create chat with user" />
+                  </div>
+                </div>
+                ])} */}
+                {
+                  (searchResults || users).map((user, i)=>(
+                    (
+                      <div className='relative flex flex-col items-start w-full p-2 mb-4 shadow-md h-max' key={i}>
+                        <h3 className='text-xl font-bold text-black'>{user.name}</h3>
+                          <p className='text-[rgb(156,163,175)] text-[15px]'>{user.tag}</p>
+                          <div className='absolute flex w-6 h-6 right-12'>
+                            <HiUserPlus className='w-full h-full'/>
+                          </div>
+                          <div 
+                            className="absolute flex w-6 h-6 cursor-pointer right-2 group"
+                            onClick={(user)=>openModal(user)}
+                          >
+                            <img src={AddChat} alt="create chat with user" />
+                          </div>
+                      </div>
+                    ))
+                  )
                 }
             </div>
         </div>

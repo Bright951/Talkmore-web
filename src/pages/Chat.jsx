@@ -8,32 +8,28 @@ import {
     MessageList,
     MessageInput,
     useCreateChatClient,
-    ChannelHeader
+    Thread
 } from 'stream-chat-react';
 import { IoMdAddCircleOutline } from "react-icons/io";
 import 'stream-chat-react/dist/css/v2/index.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import jwtDecode from 'jwt-decode';  // Correct import
-import { Client } from 'appwrite';
+
 import CustomChannelHeader from '../components/CustomChannelHeader';
 
 const Chat = () => {
     const apiKey = process.env.REACT_APP_STREAM_CHAT_API_KEY;
-    const [channel, setChannel] = useState(null);
     const [token, setToken] = useState(null);
     const [users, setUsers] = useState([]);
     const [AlreadyLoggedInUserId, setAlreadyLoggedInUserId] = useState('');
     const navigate = useNavigate();
 
     const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
-    const selectedTheme = localStorage.getItem('userTheme')
-    // const [open, setOpen] = useState(false)
   
     useEffect(() => {
-        document.documentElement.classList.remove('light', 'dark'); // Remove previous theme classes
-        document.documentElement.classList.add(theme); // Add the current theme class
-        localStorage.setItem('userTheme', theme); // Store the theme in localStorage
+        document.documentElement.classList.remove('light', 'dark'); 
+        document.documentElement.classList.add(theme); 
+        localStorage.setItem('userTheme', theme); 
       }, [theme]); 
 
     useEffect(() => {
@@ -51,12 +47,26 @@ const Chat = () => {
     const id = user.id;
 
     useEffect(() => {
-        
-    }, [id]);
+
+        const getToken = async ()=>{
+        const LoggedInUserData = localStorage.getItem('user');
+        const LoggedInuserObject = JSON.parse(LoggedInUserData);
+        const id = LoggedInuserObject.id;
+        console.log(id)
+            await axios.post('http://localhost:5000/stream/token', {id})
+            .then((res)=>{
+                setToken(res.data.token)
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+        }
+        getToken()
+    }, []);
 
     const client = useCreateChatClient({
         apiKey,
-        tokenOrProvider: token,  // Use token directly
+        tokenOrProvider: token, 
         userData: { id: id, email: user.email },
     });
     
@@ -81,6 +91,7 @@ const Chat = () => {
         const LoggedInUserData = localStorage.getItem('user');
         const LoggedInuserObject = JSON.parse(LoggedInUserData);
         const LoggedInuserId = LoggedInuserObject.id;
+        console.log(id)
 
         axios.post('http://localhost:5000/user/getUsers', { LoggedInuserId })
             .then((res) => {
@@ -130,8 +141,10 @@ const Chat = () => {
                                             <div className="flex flex-col h-full pt-14">
                                                 <MessageList />
                                                 <MessageInput />
+                                                {/* <EmojiPickerIcon/> */}
                                             </div>
                                         </Window>
+                                        <Thread />
                                     </Channel>
                                 </div>
                             </div>

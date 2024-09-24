@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const CreateUserToken= async(req, res)=>{
     const { id } = req.body;
+    console.log(req.body)
 
     if(!id){
         return (
