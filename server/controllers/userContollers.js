@@ -67,10 +67,6 @@ const SignUpUser = async(req, res)=>{
         })
         const userToken = TokenResponse.data.token
 
-        if (StreamClient && StreamClient.userID) {
-            await StreamClient.disconnectUser();
-        }
-
         await StreamClient.connectUser(
             {
                 id: uid,
@@ -80,6 +76,11 @@ const SignUpUser = async(req, res)=>{
             },
             userToken
         )
+
+        if (StreamClient && StreamClient.userID) {
+            await StreamClient.disconnectUser();
+        }
+
         return res.status(200).json({
             token: Appwrite_token,
             AppWriteuser:Appwrite_User_Details,
@@ -250,6 +251,143 @@ const CheckIfLiked = async(req, res)=>{
         return res.status(500).json({ error: 'Internal server error' });
     }
 }  
+
+const changePassWord=async(req, res)=>{
+    try {
+        const {oldPassWord, newPassWord, confirmPassWord, userPasskey, userId, streamUserId} = req.body.PasswordDetails
+    console.log(req.body)
+    
+    // const hashedNewPassWord = await bcrypt.hash(newPassWord, 12)
+    const hashedNewPassWord = await bcrypt.hash(newPassWord, 12);
+
+    const updatedPassword={
+        passkey: hashedNewPassWord,
+    }
+
+    const passwordMatch = await bcrypt.compare(oldPassWord, userPasskey);
+        if (!passwordMatch) {
+            return res.status(400).json({ message: 'Incorrect password' });
+        }
+        if(newPassWord !== confirmPassWord){
+            res.status(400).json({error: 'please confirm your correct password'})
+        }
+        const response = await databases.updateDocument(
+            'TMWDB001',
+            'TMWC001', 
+            userId, 
+            updatedPassword
+        )
+        await StreamClient.upsertUser(
+            { 
+                id: streamUserId, 
+                role: 'user', 
+                passKey: hashedNewPassWord
+            },
+        );
+        return res.status(200).json({ message: 'Password updated successfully', response });
+    } catch (error) {
+        console.error('Error updating document', error);
+        return res.status(500).json({ error: 'An error occurred while updating the password' });
+    }
+    
+}
+
+const changeName = async(req,res)=>{
+    try{
+        const {newName, userId, streamUserId} = req.body.newDetails
+        console.log(req.body)
+
+        if(!newName || !userId){
+            res.status(400).json({error : 'name and id is required'})
+        }
+        
+        const updatedName={
+            name: newName
+        }
+
+        const response = await databases.updateDocument(
+            'TMWDB001',
+            'TMWC001', 
+            userId, 
+            updatedName
+        )
+        await StreamClient.upsertUser(
+            { 
+                id: streamUserId, 
+                name: newName
+            },
+        );
+        return res.status(200).json({ message: 'name updated successfully', response });
+
+    }catch(err){
+        return res.status(500).json({ error: 'An error occurred while updating the name' });
+    }
+}
+
+const changeEmail = async(req,res)=>{
+    try{
+        const {newEmail, userId, streamUserId} = req.body.newDetails
+        console.log(req.body)
+
+        if(!newEmail || !userId){
+            res.status(400).json({error : 'Email and id is required'})
+        }
+        
+        const updatedEmail={
+            email: newEmail
+        }
+
+        const response = await databases.updateDocument(
+            'TMWDB001',
+            'TMWC001', 
+            userId, 
+            updatedEmail
+        )
+        await StreamClient.upsertUser(
+            { 
+                id: streamUserId, 
+                email: newEmail
+            },
+        );
+        return res.status(200).json({ message: 'email updated successfully', response });
+
+    }catch(err){
+        return res.status(500).json({ error: 'An error occurred while updating the email' });
+    }
+}
+
+const changeTag = async(req,res)=>{
+    try{
+        const {newTag, userId, streamUserId} = req.body.newDetails
+        console.log(req.body)
+
+        if(!newTag || !userId){
+            res.status(400).json({error : 'Tag and id is required'})
+        }
+        
+        const updatedTag={
+            tag: newTag
+        }
+
+        const response = await databases.updateDocument(
+            'TMWDB001',
+            'TMWC001', 
+            userId, 
+            updatedTag
+        )
+        await StreamClient.upsertUser(
+            { 
+                id: streamUserId, 
+                tag: newTag
+            },
+        );
+        return res.status(200).json({ message: 'email updated successfully', response });
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({ error: 'An error occurred while updating the tag' });
+    }
+}
   
 module.exports={
     SignUpUser,
@@ -258,5 +396,9 @@ module.exports={
     searchUser,
     LikeProfile,
     UnlikeProfile,
-    CheckIfLiked
+    CheckIfLiked,
+    changePassWord,
+    changeName,
+    changeEmail,
+    changeTag
 }
