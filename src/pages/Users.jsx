@@ -3,11 +3,11 @@ import axios from 'axios'
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom'
 import { HiUserPlus } from "react-icons/hi2";
-import AddChat from '../pictures/Primary.svg'
+import AddChat from '../assets/Primary.svg'
 import CreateChannelModal from '../components/CreateChannel';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const Users = () => {
-    const [AlreadyLoggedInUserId, setAlreadyLoggedInUserId] = useState('')
     const [searchResults, setSearchResults] = useState(null)
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
@@ -15,19 +15,17 @@ const Users = () => {
     const [displayModal, setDisplayModal] = useState(false)
     const [selectedUser, setSelectedUser] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const user = JSON.parse(localStorage.getItem('user'))
     
     useEffect(()=>{
         const getUsers=()=>{
           setLoading(true)
-          const LoggedInUserData = localStorage.getItem('user')
-          const LoggedInuserObject = JSON.parse(LoggedInUserData)
-          const LoggedInuserId = LoggedInuserObject.id
+          const LoggedInuserId = user.id
           
           axios.post('http://localhost:5000/user/getUsers',{LoggedInuserId}, {
             timeout: 10000,
           })
           .then((res)=>{
-            // setAlreadyLoggedInUserId(LoggedInuserId)
             setUsers(res.data.Users)
             setLoading(false)
           })
@@ -37,10 +35,6 @@ const Users = () => {
         }
         getUsers()
       },[])
-
-      // const CreateChat=(user)=>{
-
-      // }
 
       const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
   
@@ -54,18 +48,11 @@ const Users = () => {
         setSelectedUser(user);
         setDisplayModal(true);
       };
-
-      const checkUser =()=>{
-        const User = localStorage.getItem('user')
-    
-        if(!User){
-          navigate('/Login')
-        }
-      }
-      checkUser()
       
       useEffect(()=>{
-        checkUser()
+        if(!user){
+          navigate('/Login')
+        }
       },[])
 
       const searchUser=async(e)=>{
@@ -146,18 +133,21 @@ const Users = () => {
                 {
                   (searchResults || users).map((user, i)=>(
                     (
-                      <div className='relative flex flex-col items-start w-full p-2 mb-4 shadow-md h-max' key={i}>
-                        <h3 className='text-xl font-bold text-black'>{user.name}</h3>
+                      <div className='relative flex flex-row items-center w-full p-2 mb-4 shadow-md h-max' key={i}>
+                        <img src={user.image} alt='profile Pic' className='w-10 h-10 rounded-full'/>
+                        <div className="flex flex-col pl-2">
+                          <h3 className='text-xl font-bold text-black'>{user.name}</h3>
                           <p className='text-[rgb(156,163,175)] text-[15px]'>{user.tag}</p>
-                          <div className='absolute flex w-6 h-6 right-12'>
-                            <HiUserPlus className='w-full h-full'/>
-                          </div>
-                          <div 
-                            className="absolute flex w-6 h-6 cursor-pointer right-2 group"
-                            onClick={(user)=>openModal(user)}
-                          >
-                            <img src={AddChat} alt="create chat with user" />
-                          </div>
+                        </div>
+                        <div className='absolute flex w-6 h-6 right-12'>
+                          <HiUserPlus className='w-full h-full'/>
+                        </div>
+                        <div 
+                          className="absolute flex w-6 h-6 cursor-pointer right-2 group"
+                          onClick={(user)=>openModal(user)}
+                        >
+                          <img src={AddChat} alt="create chat with user" />
+                        </div>
                       </div>
                     ))
                   )

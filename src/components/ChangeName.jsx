@@ -22,6 +22,8 @@ const ChangeName = () => {
             const res = resp.data.response
             user.name = res.name
             localStorage.setItem('user', JSON.stringify(user)); 
+            alert('Success')
+            setNewName('')
         })
         .catch((err)=>{
             console.log(err)

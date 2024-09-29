@@ -27,6 +27,10 @@ const ChangePassword = () => {
             const resp = res.data.response
             user.passkey = resp.passkey
             localStorage.setItem('user', JSON.stringify(user))
+            alert('Success')
+            setOldPassWord('')
+            setNewPassWord('')
+            setConfirmPassWord('')
         })
         .catch((err)=>{
             console.log(err)

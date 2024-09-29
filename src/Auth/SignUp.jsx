@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode'; // Removed curly braces, since jwt-decode is a default export
-import Logo from '../pictures/Tallmore2.png';
+import Logo from '../assets/Tallmore2.png';
 import {Link} from 'react-router-dom'
+import { StreamChat } from 'stream-chat';
 
 const SignUp = () => {
     const [name, setName] = useState('');
@@ -11,68 +11,68 @@ const SignUp = () => {
     const [password, setPassword] = useState('');
     const [userName, setUserName] = useState('');
     const [loading, setLoading] = useState(false);
-    const [avatar, setAvatar] = useState(null);
+    const StreamClient = StreamChat.getInstance(process.env.REACT_APP_STREAM_CHAT_API_KEY);
 
     const navigate = useNavigate();
 
-    // const handleFileChange = (e) => {
-    //     setAvatar(e.target.files[0]);
-    //     console.log(e.target.files[0]); // Log the file being selected
-    // };
+    const reset =()=>{
+        setUserName('')
+        setEmail('')
+        setPassword('')
+    }
 
     const SubmitForm = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('userEmail', email);
-        formData.append('passKey', password);
-        formData.append('tag', userName);
-        // formData.append('avatar', avatar); // Corrected the avatar field name
-
+        const userDetails={
+            userEmail: email,
+            passKey: password,
+            name:name,
+            tag: userName
+          }
         try {
-            const res = await axios.post('http://localhost:5000/user/reg', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                timeout:10000,
-            });
+            await axios.post('http://localhost:5000/user/reg', userDetails , {
+                'Content-Type':'application/json'
+            })
+            .then(async(res)=>{
+                const {session} = res.data
+                const {User} = res.data
+                
+                localStorage.setItem('user', User)
+                localStorage.setItem('session', session)
+                
+                if(!User){
+                    return 'no User'
+                }
 
-            console.log(res);
-            const { token, AppWriteuser, StreamUser} = res.data;
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(AppWriteuser));
-            localStorage.setItem('streamUser', JSON.stringify(StreamUser))
-
-            saveToken(); // Save token to handle expiration
-            startTokenExpiryTimer(); // Start token expiry timer
-
-            navigate('/'); // Navigate to home or dashboard after signup
+                if(!session){
+                    return 'no session';
+                }
+        
+                    const TokenResponse =  await axios.post('http://localhost:5000/stream/token', {
+                        id: User.id
+                    })
+                    const userToken = TokenResponse.data.token
+                
+                    await StreamClient.connectUser(
+                        {
+                            email: User.email,
+                            passKey: User.passKey,
+                            name: User.name,
+                            id: User.id, 
+                            tag: User.tag,
+                            image: User.imgurl
+                        },
+                        userToken
+                    )
+                    setLoading(false);
+                    navigate('/')
+            })
         } catch (err) {
             console.log(err, 'error');
-        } finally {
-            setLoading(false);
         }
     };
-
-    const saveToken = () => {
-        const token = localStorage.getItem('token');
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000; // Current time in seconds
-        const expiryTime = decoded.exp - currentTime;
-        localStorage.setItem('expiryTime', expiryTime);
-    };
-
-    const startTokenExpiryTimer = () => {
-        const expiryTime = localStorage.getItem('expiryTime');
-        setTimeout(() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('expiryTime');
-            navigate('/login');
-        }, expiryTime * 1000); // Convert seconds to milliseconds
-    };
-
     return (
         <div className="flex items-center w-full h-screen gap-8 bg-black">
             <div className="flex w-[48%] h-[97%] bg-white rounded-md ml-[1%]">

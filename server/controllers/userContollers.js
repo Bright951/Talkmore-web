@@ -1,38 +1,51 @@
+require('dotenv').config();
 const StreamChat = require('stream-chat').StreamChat;
-const { Client, Databases, Query , Storage, ID} = require('node-appwrite');
+const { Client, Databases, Query , Storage, ID, Account, Avatars} = require('node-appwrite');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
-const { v4: uuidv4 } = require('uuid');
-const crypto = require('crypto')
-const fs = require('fs')
-
 const axios = require('axios');
-// const { Avatar } = require('stream-chat-react');
+const {getRecentPosts} = require('../functions/functions')
 
-const StreamClient = StreamChat.getInstance('7xbczcyhwmhd', '3m8pq4v7b66wefunef3kgbqyt3cdspvpnnms9j9qfbt7vkxanmddhrumq96wp2rv');
+const StreamClient = StreamChat.getInstance(process.env.REACT_APP_STREAM_CHAT_API_KEY, process.env.REACT_APP_STREAM_CHAT_SECRET_KEY);
 
 const appwriteClient = new Client();
 appwriteClient
-    .setEndpoint('https://cloud.appwrite.io/v1') 
-    .setProject('66db203000090f4aa825'); 
+    .setEndpoint(process.env.REACT_APP_APPWRITE_PROJECT_URL) 
+    .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID)
+    .setKey(process.env.REACT_APP_APPWRITE_API_KEY)
 
 const databases = new Databases(appwriteClient);
 const storage = new Storage(appwriteClient);
-
+const account = new Account(appwriteClient);
+const avatars = new Avatars(appwriteClient);
 
 const SignUpUser = async(req, res)=>{
-    const { name, tag, userEmail, passKey, avatar} = req.body;
-    const hashedPassword = await bcrypt.hash(passKey, 12);
+    const { name, tag, userEmail, passKey} = req.body;
     console.log(req.body)
-    const id = uuidv4();
-    const uid = id.toString()
-    // console.log(id)
     if (!name || !userEmail || !passKey  || !tag) {
         return res.status(400).json({ error: 'Please provide all required fields' });
     }
-    const secret = crypto.randomBytes(32).toString('hex')
     try {
-        const existingUsers = await databases.listDocuments('TMWDB001', 'TMWC001', [
+        const Appwrite_User_Details = await account.create(
+            ID.unique(),
+            userEmail,
+            passKey,
+            name,
+            { 
+                tag: tag 
+            }
+        )
+
+        const avatar = await avatars.getInitials(name)
+        const avatarBlob = new Blob([avatar], { type: 'image/png' });
+        const avatarFile = new File([avatarBlob], `avartar_${Appwrite_User_Details.$id}.png`, { type: 'image/png' });
+        const avartar = await storage.createFile(
+            process.env.REACT_APP_APPWRITE_STORAGE_BUCKET_ID,
+            ID.unique(),
+            avatarFile
+        )  
+        const avartarURL = `${process.env.REACT_APP_APPWRITE_PROJECT_URL}/storage/buckets/${process.env.REACT_APP_APPWRITE_STORAGE_BUCKET_ID}/files/${avartar.$id}/view?project=${process.env.REACT_APP_APPWRITE_PROJECT_ID}`
+        console.log(avartarURL)
+            const existingUsers = await databases.listDocuments(process.env.REACT_APP_APPWRITE_DATABASE_ID, process.env.REACT_APP_APPWRITE_DATABASE_USERS_COLLECTION_ID, [
             Query.equal('tag', [tag]),
             Query.equal('email', [userEmail])
         ]);
@@ -40,51 +53,36 @@ const SignUpUser = async(req, res)=>{
         if (existingUsers.total > 0) {
             return res.status(400).json({ error: 'User already exists with this email or Tag' });
         }
-        const Appwrite_User_Details = await databases.createDocument(
-            'TMWDB001',
-            'TMWC001',
+
+        const New_User = await databases.createDocument(
+            process.env.REACT_APP_APPWRITE_DATABASE_ID,
+            process.env.REACT_APP_APPWRITE_DATABASE_USERS_COLLECTION_ID,
             ID.unique(),
             {
-                id:uid,
-                name:name,
-                email: userEmail,
-                passkey: hashedPassword,
-                tag:tag,
-                // image: Pic,
+                email: Appwrite_User_Details.email,
+                passKey: passKey,
+                name: Appwrite_User_Details.name,
+                id: Appwrite_User_Details.$id, 
+                tag: tag,
+                imgid: avartar.$id,
+                imgurl: avartarURL,
             }
         )
-            const Appwrite_token = jwt.sign({ user_id: Appwrite_User_Details.id }, secret, { expiresIn: '1d' });
-        
+    
         await StreamClient.upsertUser({
-            id: uid,
-            name: name,
-            email:userEmail,
-            tag:tag,
+            email: Appwrite_User_Details.email,
+            passKey: Appwrite_User_Details.password,
+            name: Appwrite_User_Details.name,
+            id: Appwrite_User_Details.$id, 
+            tag: tag,
+            image: avartarURL,
         })
-        
-        const TokenResponse =  await axios.post('http://localhost:5000/stream/token', {
-            id: uid
-        })
-        const userToken = TokenResponse.data.token
 
-        await StreamClient.connectUser(
-            {
-                id: uid,
-                name: name,
-                tag: tag,
-                email:userEmail
-            },
-            userToken
-        )
-
-        if (StreamClient && StreamClient.userID) {
-            await StreamClient.disconnectUser();
-        }
+        const session = await account.createEmailPasswordSession(New_User.email, New_User.passKey)
 
         return res.status(200).json({
-            token: Appwrite_token,
-            AppWriteuser:Appwrite_User_Details,
-            StreamUser:{id:id, name:name, tag:tag, email:userEmail}
+            User:New_User,
+            session
         });
          
     } catch (error) {
@@ -95,42 +93,26 @@ const SignUpUser = async(req, res)=>{
 
 const SignInUser = async(req, res)=>{
     const {passKey, userEmail, name} = req.body
-    const secret = crypto.randomBytes(32).toString('hex')
     console.log(req.body)
 
     try{
-        const IsValid = await databases.listDocuments('TMWDB001', 'TMWC001', [
+        const IsValid = await databases.listDocuments(process.env.REACT_APP_APPWRITE_DATABASE_ID, process.env.REACT_APP_APPWRITE_DATABASE_USERS_COLLECTION_ID, [
             Query.equal('email', [userEmail]),
-            Query.equal('name', [name])
+            Query.equal('name', [name]),
+            Query.equal('passKey', [passKey])
         ]);
 
         if (IsValid.total === 0) {
             return res.status(400).json({ message: 'Invalid email or name' });
         }
+
         const userResponse = IsValid.documents[0]
         const document = JSON.stringify(userResponse)
         const user = JSON.parse(document)
-        
-        const passwordMatch = await bcrypt.compare(passKey, user.passkey);
-        if (!passwordMatch) {
-            return res.status(400).json({ message: 'Invalid or password' });
-        }
-        const token = jwt.sign({ user_id: user.id }, secret, { expiresIn: '1d' });
 
-        const TokenResponse =  await axios.post('http://localhost:5000/stream/token', {
-            id: user.id
-        })
-        const userToken = TokenResponse.data.token
-        await StreamClient.connectUser(
-            {
-                id: user.id,
-                name: user.name,
-                tag: user.tag,
-                email: user.email
-            },
-            userToken
-        )
-        res.json({token, user}).status(200)
+        const session = await account.createEmailPasswordSession(user.email, user.passKey)
+
+        res.json({user, session}).status(200)
     }catch(error){
         console.log(error);
     }
@@ -146,6 +128,7 @@ const getAllUsers =async(req, res)=>{
             banned: false,
           });
         const Users = response.users;
+        console.log(Users)
         
         res.status(200).json({ Users });
         
@@ -156,7 +139,10 @@ const getAllUsers =async(req, res)=>{
     
 }
 
-// const response = await serverClient.queryUsers({ name: { $autocomplete: 'ro' } });
+const getRecentPost = async(req, res)=>{
+   const posts = await getRecentPosts()
+   return res.status(200).json(posts);
+}
 
 const searchUser=async(req, res)=>{
     const {searchTerm}=req.body
@@ -400,5 +386,6 @@ module.exports={
     changePassWord,
     changeName,
     changeEmail,
-    changeTag
+    changeTag,
+    getRecentPost
 }

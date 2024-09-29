@@ -1,6 +1,5 @@
 import axios from 'axios'
 import React , {useEffect, useState} from 'react'
-import {jwtDecode} from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -10,7 +9,7 @@ const Login = () => {
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
-
+  
   const userDetails={
     userEmail: email,
     passKey: password,
@@ -26,19 +25,21 @@ const Login = () => {
     // setLoading(false)
   }
   
-  const SubmitForm=(e)=>{
+  const SubmitForm= (e)=>{
     setLoading(true)
     e.preventDefault()
     axios.post('http://localhost:5000/user/login', userDetails, {
       'Content-Type':'application/json'
     })
-    .then((res)=>{
+    .then(async(res)=>{
+
       setLoading(false)
-      console.log(res)
-      const {token, user} = res.data
-      localStorage.setItem('token', token);
+      const {session} = res.data
+      const {user} = res.data
+      
       localStorage.setItem('user', JSON.stringify(user));
-      console.log(token , user)
+      localStorage.setItem('session', JSON.stringify(session));
+      
       navigate('/')
     })
     .catch((err) =>{
@@ -47,29 +48,6 @@ const Login = () => {
     })
   }
 
-  const saveToken = () => {
-    const token = localStorage.getItem('token')
-    const decoded = jwtDecode(token);
-    console.log(decoded);
-    const currentTime = Date.now() / 1000; // Current time in seconds
-    const expiryTime = decoded.exp - currentTime;
-    localStorage.setItem('expiryTime', expiryTime);
-};
-
-const startTokenExpiryTimer = () => {
-  const expiryTime = localStorage.getItem('expiryTime')
-  setTimeout(() => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('expiryTime');
-      navigate('/Login')
-  }, expiryTime * 1000); // Convert seconds to milliseconds
-};
-
-  const token =localStorage.getItem('token');
-  const expiryTime = localStorage.getItem('expiryTime');
-if (token && expiryTime) {
-  startTokenExpiryTimer(expiryTime);
-}
 
   return (
     <div className='flex items-center w-full h-screen gap-8 bg-black'>

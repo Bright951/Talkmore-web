@@ -7,76 +7,63 @@ import {
     Window,
     MessageList,
     MessageInput,
-    useCreateChatClient,
     Thread
 } from 'stream-chat-react';
 import { IoMdAddCircleOutline } from "react-icons/io";
 import 'stream-chat-react/dist/css/v2/index.css';
+import { StreamChat } from 'stream-chat';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
 import CustomChannelHeader from '../components/CustomChannelHeader';
 
 const Chat = () => {
     const apiKey = process.env.REACT_APP_STREAM_CHAT_API_KEY;
     const [token, setToken] = useState(null);
+    const [client, setClient] = useState(null);
     const [users, setUsers] = useState([]);
-    const [AlreadyLoggedInUserId, setAlreadyLoggedInUserId] = useState('');
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user'));
 
-    const [theme, setTheme] = useState(localStorage.getItem('userTheme') || 'light');
-  
-    useEffect(() => {
-        document.documentElement.classList.remove('light', 'dark'); 
-        document.documentElement.classList.add(theme); 
-        localStorage.setItem('userTheme', theme); 
-      }, [theme]); 
+    const filters = { members: { $in: [user.id] } };
 
     useEffect(() => {
-        const checkUser = () => {
-            const User = localStorage.getItem('user');
-            if (!User) {
-                navigate('/Login');
+        const initializeChatClient = async () => {
+            try {
+                const TokenResponse = await axios.post('http://localhost:5000/stream/token', {
+                    id: user.id,
+                });
+
+                const userToken = TokenResponse.data.token;
+                const StreamClient = StreamChat.getInstance(apiKey);
+
+                await StreamClient.connectUser(
+                    {
+                        id: user.id,
+                        name: user.name,
+                        tag: user.tag,
+                        email: user.email,
+                        image: user.imgurl,
+                    },
+                    userToken
+                );
+
+                setToken(userToken);
+                setClient(StreamClient);
+                console.log('User connected to StreamChat:', user.name);
+            } catch (error) {
+                console.error('Error fetching token or connecting user:', error);
             }
         };
-        checkUser();
-    }, [navigate]);
 
-    const User = localStorage.getItem('user');
-    const user = JSON.parse(User);
-    const id = user.id;
+        initializeChatClient();
 
-    useEffect(() => {
-
-        const getToken = async ()=>{
-        const LoggedInUserData = localStorage.getItem('user');
-        const LoggedInuserObject = JSON.parse(LoggedInUserData);
-        const id = LoggedInuserObject.id;
-        console.log(id)
-            await axios.post('http://localhost:5000/stream/token', {id})
-            .then((res)=>{
-                setToken(res.data.token)
-            })
-            .catch((err)=>{
-                console.log(err)
-            })
-        }
-        getToken()
-    }, []);
-
-    const client = useCreateChatClient({
-        apiKey,
-        tokenOrProvider: token, 
-        userData: { id: id, email: user.email },
-    });
-    
-    useEffect(() => {
-        if (client) {
-            console.log('Client initialized successfully:', client);
-        } else {
-            console.log('Client not initialized');
-        }
-    }, [client]);
+        return () => {
+            if (client) {
+                client.disconnectUser();
+                console.log('User disconnected from StreamChat');
+            }
+        };
+    }, [user, apiKey]); // apiKey included in dependency array for better practice
 
     if (!client || !token) {
         return (
@@ -87,23 +74,15 @@ const Chat = () => {
         );
     }
 
-    const getUsers = () => {
-        const LoggedInUserData = localStorage.getItem('user');
-        const LoggedInuserObject = JSON.parse(LoggedInUserData);
-        const LoggedInuserId = LoggedInuserObject.id;
-        console.log(id)
-
-        axios.post('http://localhost:5000/user/getUsers', { LoggedInuserId })
-            .then((res) => {
-                setAlreadyLoggedInUserId(LoggedInuserId);
-                setUsers(res.data);  // Set response data correctly
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+    const getUsers = async () => {
+        try {
+            const LoggedInuserId = user.id;
+            const response = await axios.post('http://localhost:5000/user/getUsers', { LoggedInuserId });
+            setUsers(response.data);  // Set response data correctly
+        } catch (err) {
+            console.error(err);
+        }
     };
-
-    const filters = {members: { $in: [id] }};
 
     return (
         <div className='relative flex w-full bg-white rounded-md'>
@@ -129,19 +108,15 @@ const Chat = () => {
                     </div>
                     <div className='w-full h-full'>
                         <Chats client={client}>
-                            <ChannelList
-                                filters={filters}
-                            />
-                            <div className="flex w-[68vw] h-[98vh] absolute top-0 left-[26%] z-">
+                            <ChannelList filters={filters} />
+                            <div className="flex w-[68vw] h-[98vh] absolute top-0 left-[26%] z-10">
                                 <div className="w-full h-full">
                                     <Channel>
                                         <Window>
-                                            {/* <ChannelHeader/> */}
-                                            <CustomChannelHeader/>
+                                            <CustomChannelHeader />
                                             <div className="flex flex-col h-full pt-14">
                                                 <MessageList />
                                                 <MessageInput />
-                                                {/* <EmojiPickerIcon/> */}
                                             </div>
                                         </Window>
                                         <Thread />

@@ -21,6 +21,8 @@ const ChangeEmail = () => {
             const res = resp.data.response
             user.email = res.email
             localStorage.setItem('user', JSON.stringify(user)); 
+            alert('Success')
+            setNewEmail('')
         })
         .catch((err)=>{
             console.log(err)

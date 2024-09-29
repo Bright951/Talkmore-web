@@ -1,7 +1,6 @@
 const { StreamChat } = require('stream-chat');
-const Client = StreamChat.getInstance('7xbczcyhwmhd','3m8pq4v7b66wefunef3kgbqyt3cdspvpnnms9j9qfbt7vkxanmddhrumq96wp2rv');
+const Client = StreamChat.getInstance(process.env.REACT_APP_STREAM_CHAT_API_KEY, process.env.REACT_APP_STREAM_CHAT_SECRET_KEY);
 const { v4: uuidv4 } = require('uuid');
-// console.log(Client);
 
 const CreateUserToken= async(req, res)=>{
     const { id } = req.body;

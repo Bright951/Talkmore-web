@@ -1,4 +1,4 @@
-import React from 'react'
+import React , {useState, useEffect} from 'react'
 import { useCallStateHooks, ParticipantView } from '@stream-io/video-react-sdk';
 import { IoMdMicOff } from "react-icons/io";
 import { IoMdMic } from "react-icons/io";
@@ -23,23 +23,32 @@ const ParticipantGrid = ()=>{
 }
   
 
-  const VideoCallUi =(call)=>{
+  const VideoCallUi =({call})=>{
+    const [currentCall, setCurrentCall] = useState(null)
     
+    useEffect(()=>{
+        if (!currentCall) {
+            setCurrentCall(call);
+          }
+    },[call, currentCall])  
+
     const navigate = useNavigate()
     const { useMicrophoneState } = useCallStateHooks();
     const { microphone, isMute } = useMicrophoneState();
-
+    
     const { useCameraState } = useCallStateHooks();
     const { camera, isMute:isMuted } = useCameraState();
 
-    const endCall= async (call)=>{
-        await call.end
+    const EndCall= async ()=>{
+        if(currentCall){
+            await currentCall.endCall()
+        }
         localStorage.removeItem('activeCallId')
         navigate('/Chat')
     }
     
     return(
-        <div className='fixed w-full ml-[80px] h-[70px] border-[1px] backdrop-blur-lg shadow-md border-t-white bottom-0 flex gap-6 items-center justify-center flex-row boorder-0 left-0 bg-white'>
+        <div className='fixed w-[90%] rounded-md h-[70px] border-[1px] backdrop-blur-lg shadow-md border-t-white bottom-[5px] flex gap-8 items-center justify-center flex-row boorder-0 left-[105px] right-[10px] bg-white'>
             <div 
                 className="flex w-[50px] h-[50px] bg-[rgba(209,213,219,0.3)] cursor-pointer p-2 rounded-full justify-center items-center"
                 onClick={() => microphone.toggle()}
@@ -73,12 +82,12 @@ const ParticipantGrid = ()=>{
                 }
             </div>
             <div 
-                className="flex w-[60px] h-[60px] cursor-pointer bg-[rgba(209,213,219,0.3)] rounded-full justify-center justify-self-end p-2 items-center"
+                className="flex w-[60px] h-[60px] absolute right-4 cursor-pointer bg-[rgba(209,213,219,0.3)] rounded-full justify-center justify-self-end p-2 items-center"
             >
                 <MdCallEnd 
                     color='red' 
                     className='w-full h-full'
-                    onClick={endCall(call)}
+                    onClick={EndCall}
                 />
             </div>
             

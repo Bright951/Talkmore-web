@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Avatar = ({letter}) => {
+const Avatar = ({letter, fs}) => {
   return (
-    <div className='rounded-full ml-4 flex h-[50px] w-[50px] text-2xl items-center justify-center text-white bg-[#005fff]'>
+    <div className={`rounded-full flex h-full w-full font-bold text-${fs} items-center justify-center text-white bg-[#005fff]`}>
         <p>{letter}</p>
     </div>
   )

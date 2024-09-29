@@ -30,7 +30,7 @@ const Settins = () => {
     
   return (
     <div className='w-full h-screen p-8 bg-white rounded-md dark:bg-black'>
-        <div className="flex flex-col w-full h-full p-10 overflow-y-scroll rounded-md shadow-lg gap-14 dark:shadow-dark-md">
+        <div className="flex flex-col w-full h-full p-10 overflow-y-scroll rounded-md shadow-lg scrollbar-thin scrollbar-thumb-gray-900 scrollbar-track-gray-300 gap-14 dark:shadow-dark-md">
             <div className="flex flex-col border-[1px] border-black dark:border-white p-8 pb-12 rounded-md gap-12 h-max">
                 <h1 className='text-2xl font-bold dark:text-white'>Preferences</h1>
                 <div className="flex flex-row flex-shrink-0 w-full p-4 rounded-md relative dark:bg-white shadow-md items-center h-[90px]">

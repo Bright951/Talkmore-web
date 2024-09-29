@@ -21,6 +21,8 @@ const ChangeTag = () => {
             const res = resp.data.response
             user.tag = res.tag
             localStorage.setItem('user', JSON.stringify(user)); 
+            alert('Success')
+            setNewTag('')
         })
         .catch((err)=>{
             console.log(err)

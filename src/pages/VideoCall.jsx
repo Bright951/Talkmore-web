@@ -3,6 +3,7 @@ import { StreamVideoClient, StreamVideo, StreamTheme, StreamCall, SpeakerLayout,
 import { useSearchParams } from 'react-router-dom';
 import { useVideoClient } from '../contexts/VideoCallContext';
 import  VideoCallUi from '../components/VideoCallUi'
+import '@stream-io/video-react-sdk/dist/css/styles.css'
 
 const VideoCall = () => {
 
@@ -23,8 +24,8 @@ const VideoCall = () => {
 
       
       return () => {
-        videoCall.leave();
-        client.disconnectUser();
+        // videoCall.leave();
+        // client.disconnectUser();
       };
     };
 
@@ -32,26 +33,30 @@ const VideoCall = () => {
   }, [callId, client, call]);
   
   return (
-    <StreamVideo client={client}>
-      <StreamTheme>
-        {call ? (
-          <StreamCall call={call}>
-            <div className="flex h-[80vh]">
-              <SpeakerLayout />
-            </div>
-            <VideoCallUi call={call} />
-            {/* <MyMicrophoneButton/>
-            <MyVideoButton/> */} 
-          </StreamCall>
-        ) : (
-          <div className="flex items-center justify-center w-full h-[97vh] mt-2 mb-[0.2rem] mr-4 bg-white rounded-lg">
-            <svg className="w-5 h-5 mr-3 text-white bg-black animate-spin" viewBox="0 0 24 24"></svg>
-            <p>Initialising call.</p>
+      <div className='flex w-full h-full'>
+        <StreamVideo client={client}>
+          <div className="flex w-full h-full">
+            <StreamTheme>
+              {call ? (
+                <StreamCall call={call}>
+                  <div className="flex w-full h-full">
+                    <div className="flex w-full h-full">
+                      <SpeakerLayout />
+                    </div>
+                  </div>
+                  <VideoCallUi call={call} />
+                </StreamCall>
+              ) : (
+                <div className="flex items-center justify-center w-full h-[97vh] mt-2 mb-[0.2rem] mr-4 bg-white rounded-lg">
+                  <svg className="w-5 h-5 mr-3 text-black animate-spin" viewBox="0 0 24 24"></svg>
+                  <p>Initializing call...</p>
+                </div>
+              )}
+            </StreamTheme>
           </div>
-        )}
-      </StreamTheme>
-    </StreamVideo>
-  );
-};
+        </StreamVideo>
+      </div>
+    );
+  }
 
 export default VideoCall;
